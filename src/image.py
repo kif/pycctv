@@ -31,7 +31,7 @@ class Image(object):
     camera = cv.CaptureFromCAM(0)
     cv.SetCaptureProperty(camera, cv.CV_CAP_PROP_FRAME_WIDTH, shape[1])
     cv.SetCaptureProperty(camera, cv.CV_CAP_PROP_FRAME_HEIGHT, shape[0])
-    font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 3, 8)
+    font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 1, 8)
     cv.NamedWindow('Camera', cv.CV_WINDOW_AUTOSIZE)
     cascade = cv.Load('/usr/share/opencv/haarcascades/haarcascade_frontalface_alt.xml')
     def __init__(self, filename=None):
@@ -46,7 +46,7 @@ class Image(object):
         self.mean = None
         self.std = None
         self.thumb = None
-        if os.path.isfile(filename):
+        if filename and os.path.isfile(filename):
             self.frame = cv.LoadImage(filename, cv.CV_LOAD_IMAGE_COLOR)
             self.timestamp = time.time()
     def __repr__(self):
@@ -94,11 +94,11 @@ class Image(object):
         """
         Put date/time on image
         """
-        cv.PutText(self.frame, time.asctime(time.gmtime(self.timestamp)), (self.shape[1] - 50, self.shape[0] // 2), self.font, 255)
+        cv.PutText(self.frame, time.asctime(time.localtime(self.timestamp)), (self.shape[1] // 2 , self.shape[0] - 50), self.font, 255)
 
     def save(self, filename=None):
         if filename is None:
-            filename = time.strftime("%Y%m%d-%H%M%S.jpg", time.gmtime(self.timestamp))
+            filename = time.strftime("%Y%m%d-%Hh%Mm%S.jpg", time.localtime(self.timestamp))
         cv.SaveImage(filename, self.frame)
 
     @timeit
