@@ -74,12 +74,16 @@ class Image(object):
         npa.shape = self.shape[0] // factor, factor, self.shape[1] // factor, factor
         self.thumb = npa.sum(axis= -1).sum(axis=1) / (factor * factor)
         self.mean = self.thumb.mean()
-        self.std = self.thumb.std()
+        self.std = numpy.sqrt(((self.thumb - self.mean) ** 2).mean())
+        self.thumb /= self.std
+        self.thumb -= self.mean / self.std - 1
 
-    def delta(self, other):
+    def delta(self, other, threshold=0.1):
         if self.mean is None:
             self.binning()
-        return
+        if other.mean is None:
+            other.binning()
+        return (abs(other.thumb - self.thumb) > threshold).sum()
 
 
     def show(self, what="RGB"):
