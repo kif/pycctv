@@ -51,7 +51,7 @@ class Image(object):
             self.timestamp = time.time()
     def __repr__(self):
         if self.frame:
-            return "Image with shape %s taken at %s"(self.raw_array.shape, time.asctime(time.gmtime(self.timestamp)))
+            return "Image with shape %s taken at %s" % (self.raw_array.shape, time.asctime(time.gmtime(self.timestamp)))
         else:
             return "empty Image"
     @timeit
@@ -89,6 +89,17 @@ class Image(object):
         if other.mean is None:
             other.binning()
         return (abs(other.thumb - self.thumb) > threshold).sum()
+
+    def tag(self):
+        """
+        Put date/time on image
+        """
+        cv.PutText(self.frame, time.asctime(time.gmtime(self.timestamp)), (self.shape[1] - 50, self.shape[0] // 2), self.font, 255)
+
+    def save(self, filename=None):
+        if filename is None:
+            filename = time.strftime("%Y%m%d-%H%M%S.jpg", time.gmtime(self.timestamp))
+        cv.SaveImage(filename, self.frame)
 
     @timeit
     def detect_face(self):
