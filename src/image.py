@@ -31,7 +31,7 @@ class Image(object):
     cv.SetCaptureProperty(camera, cv.CV_CAP_PROP_FRAME_WIDTH, shape[1])
     cv.SetCaptureProperty(camera, cv.CV_CAP_PROP_FRAME_HEIGHT, shape[0])
     font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 3, 8)
-
+    cv.NamedWindow('Camera', cv.CV_WINDOW_AUTOSIZE)
     def __init__(self):
         """
         """
@@ -52,15 +52,17 @@ class Image(object):
     @timeit
     def grab(self):
         self.frame = cv.QueryFrame(self.camera)
+        size = cv.GetSize(image)
+        self.shape = size[1], size[0]  # self.shape != self.__class__.shape
         self.timestamp = time.time()
         self.raw_array = numpy.fromstring(self.frame.tostring(), dtype="uint8")
         self.raw_array.shape = self.shape[0], self.shape[1], -1
         if self.raw_array.shape[-1] == 1:
             self.grey_array = self.raw_array[:, :, 0].astype(numpy.float32)
         elif self.raw_array.shape[-1] == 3:
-            self.grey_array = numpy.float32(0.2126) * i[:, :, 0] + \
-                              numpy.float32(0.7152) * i[:, :, 1] + \
-                              numpy.float32(0.0722) * i[:, :, 2]
+            self.grey_array = numpy.float32(0.2126) * self.raw_array[:, :, 0] + \
+                              numpy.float32(0.7152) * self.raw_array[:, :, 1] + \
+                              numpy.float32(0.0722) * self.raw_array[:, :, 2]
 
     @timeit
     def binning(self, factor=None):
@@ -77,15 +79,19 @@ class Image(object):
     def delta(self, other):
         if self.mean is None:
             self.binning()
+        return
 
 
     def show(self, what="RGB"):
+
+
         pylab.ion()
         if self.raw_array.shape[-1] not in [3, 4]:
             what = "L"
         if what == "RGB":
             pylab.imshow(self.raw_array)
-        else:
+        elif what == "L":
             # show grey image
             pylab.imshow(self.grey_array, cmap="gray")
-
+        else:
+            cv.ShowImage('Camera', self.frame)
