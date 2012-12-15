@@ -52,7 +52,7 @@ class Image(object):
     @timeit
     def grab(self):
         self.frame = cv.QueryFrame(self.camera)
-        size = cv.GetSize(image)
+        size = cv.GetSize(self.frame)
         self.shape = size[1], size[0]  # self.shape != self.__class__.shape
         self.timestamp = time.time()
         self.raw_array = numpy.fromstring(self.frame.tostring(), dtype="uint8")
