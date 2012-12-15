@@ -54,7 +54,7 @@ if __name__ == "__main__":
             break
 
         # mirror
-        cv.Flip(frame, None, 1)
+#        cv.Flip(frame, None, 1)
 
         # face detection
         detect(frame)
