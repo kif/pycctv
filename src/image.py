@@ -34,6 +34,7 @@ class Image(object):
     font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 1, 8)
     cv.NamedWindow('Camera', cv.CV_WINDOW_AUTOSIZE)
     cascade = cv.Load('/usr/share/opencv/haarcascades/haarcascade_frontalface_alt.xml')
+    last = "last.jpg"
     def __init__(self, filename=None):
         """
         """
@@ -54,7 +55,7 @@ class Image(object):
             return "Image with shape %s taken at %s" % (self.raw_array.shape, time.asctime(time.gmtime(self.timestamp)))
         else:
             return "empty Image"
-    @timeit
+#    @timeit
     def grab(self):
         self.frame = cv.QueryFrame(self.camera)
         size = cv.GetSize(self.frame)
@@ -69,7 +70,7 @@ class Image(object):
                               numpy.float32(0.7152) * self.raw_array[:, :, 1] + \
                               numpy.float32(0.0722) * self.raw_array[:, :, 2]
 
-    @timeit
+#    @timeit
     def binning(self, factor=None):
         if factor is None:
             factor = self.binning_factor
@@ -100,6 +101,9 @@ class Image(object):
         if filename is None:
             filename = time.strftime("%Y%m%d-%Hh%Mm%S.jpg", time.localtime(self.timestamp))
         cv.SaveImage(filename, self.frame)
+        if os.path.islink(self.last):
+            os.unlink(self.last)
+        os.symlink(filename, self.last)
 
     @timeit
     def detect_face(self):
@@ -135,3 +139,30 @@ class Image(object):
             pylab.imshow(self.grey_array, cmap="gray")
         else:
             cv.ShowImage('Camera', self.frame)
+
+def loop_face():
+    print "Face detection from camera loop"
+    while 1:
+        t0 = time.time()
+        i = Image()
+        i.grab()
+        if i.detect_face():
+            i.tag()
+            i.save()
+            print("Frame rate: %.1f" % (1 / (time.time() - t0)))
+
+def loop_delta():
+    print "Image variation detection from camera loop"
+    last = Image()
+    last.grab()
+    while 1:
+        t0 = time.time()
+        i = Image()
+        i.grab()
+        if last.delta(i) > 3:
+            i.tag()
+            i.save()
+            print("Frame rate: %.1f" % (1 / (time.time() - t0)))
+        last = i
+
+
