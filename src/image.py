@@ -141,7 +141,7 @@ class Image(object):
             cv.ShowImage('Camera', self.frame)
 
 def loop_face():
-    print "Face detection from camera loop"
+    print("Face detection from camera loop")
     while 1:
         t0 = time.time()
         i = Image()
@@ -152,7 +152,7 @@ def loop_face():
             print("Frame rate: %.1f" % (1 / (time.time() - t0)))
 
 def loop_delta():
-    print "Image variation detection from camera loop"
+    print("Image variation detection from camera loop")
     last = Image()
     last.grab()
     while 1:
