@@ -11,6 +11,7 @@ __copyright__ = "Jérôme Kieffer"
 __date__ = "15/12/2012"
 __status__ = "devel"
 
+import os
 import logging
 logger = logging.getLogger("cctv.image")
 import cv
@@ -32,7 +33,8 @@ class Image(object):
     cv.SetCaptureProperty(camera, cv.CV_CAP_PROP_FRAME_HEIGHT, shape[0])
     font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 3, 8)
     cv.NamedWindow('Camera', cv.CV_WINDOW_AUTOSIZE)
-    def __init__(self):
+    cascade = cv.Load('/usr/share/opencv/haarcascades/haarcascade_frontalface_alt.xml')
+    def __init__(self, filename=None):
         """
         """
         self.timestamp = None
@@ -44,6 +46,9 @@ class Image(object):
         self.mean = None
         self.std = None
         self.thumb = None
+        if os.path.isfile(filename):
+            self.frame = cv.LoadImage(filename, cv.CV_LOAD_IMAGE_COLOR)
+            self.timestamp = time.time()
     def __repr__(self):
         if self.frame:
             return "Image with shape %s taken at %s"(self.raw_array.shape, time.asctime(time.gmtime(self.timestamp)))
@@ -85,10 +90,30 @@ class Image(object):
             other.binning()
         return (abs(other.thumb - self.thumb) > threshold).sum()
 
+    @timeit
+    def detect_face(self):
+        if self.frame is None:
+            self.grab()
+        # create grayscale version
+        if self.frame.nChannels == 3:
+            grayscale = cv.CreateImage(cv.GetSize(self.frame), 8, 1)
+            cv.CvtColor(self.frame, grayscale, cv.CV_BGR2GRAY)
+        else:
+            grayscale = self.frame
+        cv.EqualizeHist(grayscale, grayscale)
+
+        faces = cv.HaarDetectObjects(grayscale, self.cascade, cv.CreateMemStorage(), 1.2, 2, cv.CV_HAAR_DO_CANNY_PRUNING, (50, 50))
+
+        if faces:
+            logger.warning('%i faces detected!' % len(faces))
+#        for i, j in faces:
+#            print i, j
+#            cv.Rectangle(image, (int(i[0]), int(i[1])),
+#                         (int(i[0] + i[2]), int(i[1] + i[3])),
+#                         (0, 255, 0), 3, 8, 0)
+        return faces
 
     def show(self, what="RGB"):
-
-
         pylab.ion()
         if self.raw_array.shape[-1] not in [3, 4]:
             what = "L"

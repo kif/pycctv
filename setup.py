@@ -46,7 +46,7 @@ setup(name='pycctv',
     packages=['cctv'],
     package_dir={'cctv': 'src'},
 #    package_data={'imagizer': [os.path.join("pixmaps", i) for i in os.listdir("pixmaps") if (i.endswith(".png") or i.endswith(".ico"))]},
-    ext_package="imagizer",
+    ext_package="cctv",
 #    ext_modules=[
 #         Extension(
 #             name='libexiftran',
