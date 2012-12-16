@@ -35,6 +35,7 @@ class Image(object):
         if (cv.GetCaptureProperty(camera, cv.CV_CAP_PROP_FRAME_WIDTH) == shape[1]) and \
            (cv.GetCaptureProperty(camera, cv.CV_CAP_PROP_FRAME_HEIGHT) == shape[0]):
             break
+    binning_factor = shape[1] // 80
     font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 1, 8)
 
     window = None
