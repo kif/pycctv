@@ -33,7 +33,7 @@ class Image(object):
         cv.SetCaptureProperty(camera, cv.CV_CAP_PROP_FRAME_WIDTH, shape[1])
         cv.SetCaptureProperty(camera, cv.CV_CAP_PROP_FRAME_HEIGHT, shape[0])
         if (cv.GetCaptureProperty(camera, cv.CV_CAP_PROP_FRAME_WIDTH) == shape[1]) and \
-           (cv.SetCaptureProperty(camera, cv.CV_CAP_PROP_FRAME_HEIGHT) == shape[0]):
+           (cv.GetCaptureProperty(camera, cv.CV_CAP_PROP_FRAME_HEIGHT) == shape[0]):
             break
     font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 1, 8)
 
