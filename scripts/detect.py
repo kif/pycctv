@@ -13,12 +13,11 @@ __status__ = "devel"
 
 import optparse, logging, sys
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("cctv.detect")
+logger = logging.getLogger("cctv")
 import cctv, cctv.image
 
 def main():
-    from optparse import OptionParser
-    parser = OptionParser()
+    parser = optparse.OptionParser()
     parser.add_option("-V", "--version", dest="version", action="store_true",
                       help="print version of the program and quit", metavar="FILE", default=False)
 #        parser.add_option("-o", "--out", dest="outfile",
@@ -32,6 +31,7 @@ def main():
         sys.exit(0)
     if options.debug:
         logger.setLevel(logging.DEBUG)
+
 
 
     cctv.image.loop_delta()
