@@ -22,13 +22,20 @@
 """
 The setup.py script allows to install pycctv regardless to the operating system
 """
-
+import glob
 from distutils.core import setup
 from distutils.extension import Extension
 import os, sys, distutils.sysconfig, shutil, locale
-sys.path.insert(0, os.path.dirname(__file__))
+import os.path as op
 SCRIPTS = "scripts"
 version = "0.0.1"
+
+version = [ eval(l.split("=")[1]) for l in \
+           open(op.join(op.dirname(op.abspath(__file__)), "src", "__init__.py"))\
+           if l.strip().startswith("version")][0]
+
+scripts = glob.glob(op.join(SCRIPTS, "*.py"))
+print scripts
 
 setup(name='pycctv',
     version=version,
@@ -37,20 +44,20 @@ setup(name='pycctv',
     url='https://github.com/kif/pycctv',
     description="Python project around Closed Circuit TeleVision",
     license='GNU GPL v2',
-#    scripts=scripts,
+    scripts=scripts,
 #    data_files=[
 #        (installdir, ["selector.glade", execexiftran] +
-#        [os.path.join("pixmaps", i) for i in os.listdir("pixmaps") if (i.endswith(".png") or i.endswith(".ico"))]),
-#        (os.path.split(ConfFile[0])[0], ['imagizer.conf'])
+#        [op.join("pixmaps", i) for i in os.listdir("pixmaps") if (i.endswith(".png") or i.endswith(".ico"))]),
+#        (op.split(ConfFile[0])[0], ['imagizer.conf'])
 #    ],
     packages=['cctv'],
     package_dir={'cctv': 'src'},
-#    package_data={'imagizer': [os.path.join("pixmaps", i) for i in os.listdir("pixmaps") if (i.endswith(".png") or i.endswith(".ico"))]},
+#    package_data={'imagizer': [op.join("pixmaps", i) for i in os.listdir("pixmaps") if (i.endswith(".png") or i.endswith(".ico"))]},
     ext_package="cctv",
 #    ext_modules=[
 #         Extension(
 #             name='libexiftran',
-#             sources=[os.path.join("libexiftran", i) for i in os.listdir("libexiftran") if i.endswith(".c")],
+#             sources=[op.join("libexiftran", i) for i in os.listdir("libexiftran") if i.endswith(".c")],
 #             define_macros=[],
 #             libraries=["jpeg", "exif", "m"],
 #         ),
