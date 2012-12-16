@@ -29,10 +29,15 @@ class Image(object):
     binning_factor = 8
     shape = (768, 1024)
     camera = cv.CaptureFromCAM(0)
-    cv.SetCaptureProperty(camera, cv.CV_CAP_PROP_FRAME_WIDTH, shape[1])
-    cv.SetCaptureProperty(camera, cv.CV_CAP_PROP_FRAME_HEIGHT, shape[0])
+    for shape in ((1024, 1280), (960, 1280), (768, 1024), (480, 640)):
+        cv.SetCaptureProperty(camera, cv.CV_CAP_PROP_FRAME_WIDTH, shape[1])
+        cv.SetCaptureProperty(camera, cv.CV_CAP_PROP_FRAME_HEIGHT, shape[0])
+        if (cv.GetCaptureProperty(camera, cv.CV_CAP_PROP_FRAME_WIDTH) == shape[1]) and \
+           (cv.SetCaptureProperty(camera, cv.CV_CAP_PROP_FRAME_HEIGHT) == shape[0]):
+            break
     font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 1, 8)
-    cv.NamedWindow('Camera', cv.CV_WINDOW_AUTOSIZE)
+
+    window = None
     cascade = cv.Load('/usr/share/opencv/haarcascades/haarcascade_frontalface_alt.xml')
     last = "last.jpg"
     def __init__(self, filename=None):
@@ -142,6 +147,9 @@ class Image(object):
             # show grey image
             pylab.imshow(self.grey_array, cmap="gray")
         else:
+            if self.window is None:
+                cv.NamedWindow('Camera', cv.CV_WINDOW_AUTOSIZE)
+                self.__class__.window = True
             cv.ShowImage('Camera', self.frame)
 
 def loop_face():
@@ -163,7 +171,9 @@ def loop_delta(count=3, thres=0.1):
         t0 = time.time()
         i = Image()
         i.grab()
-        if last.delta(i, thres) > count:
+        cnt = last.delta(i, thres)
+        logger.debug("counted %i" % cnt)
+        if cnt > count:
             i.tag()
             i.save()
             print("Frame rate: %.1f" % (1 / (time.time() - t0)))
