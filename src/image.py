@@ -89,6 +89,9 @@ class Image(object):
             self.binning()
         if other.mean is None:
             other.binning()
+        if self.mean <= 1 and other.mean < 1:
+            # if the signal is very low ...
+            return 0
         return (abs(other.thumb - self.thumb) > threshold).sum()
 
     def tag(self):
@@ -99,7 +102,8 @@ class Image(object):
 
     def save(self, filename=None):
         if filename is None:
-            filename = time.strftime("%Y%m%d-%Hh%Mm%S.jpg", time.localtime(self.timestamp))
+            # millisec precision
+            filename = time.strftime("%Y%m%d-%Hh%Mm%S", time.localtime(self.timestamp)) + str(self.timestamp % 1)[1:5] + ".jpg"
         cv.SaveImage(filename, self.frame)
         if os.path.islink(self.last):
             os.unlink(self.last)
@@ -151,7 +155,7 @@ def loop_face():
             i.save()
             print("Frame rate: %.1f" % (1 / (time.time() - t0)))
 
-def loop_delta():
+def loop_delta(count=3, thres=0.1):
     print("Image variation detection from camera loop")
     last = Image()
     last.grab()
@@ -159,7 +163,7 @@ def loop_delta():
         t0 = time.time()
         i = Image()
         i.grab()
-        if last.delta(i) > 3:
+        if last.delta(i, thres) > count:
             i.tag()
             i.save()
             print("Frame rate: %.1f" % (1 / (time.time() - t0)))
